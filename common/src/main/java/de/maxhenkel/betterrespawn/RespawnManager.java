@@ -1,24 +1,35 @@
 package de.maxhenkel.betterrespawn;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.PlayerRespawnLogic;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
-import java.util.Random;
+import java.util.*;
 
 public class RespawnManager {
 
     private static final int FIND_SPAWN_ATTEMPTS = 16;
 
     private final Random random;
+
+    /** Hardcore Respawn added variables **/
+    private final Map<UUID, Long> lastDeathTimes = new HashMap<>();
+    private static final long RESPAWN_COOLDOWN = 9 * 60 * 1000; // 9 minutes in milliseconds
+
 
     public RespawnManager() {
         random = new Random();
@@ -87,6 +98,65 @@ public class RespawnManager {
         } else {
             BetterRespawnMod.LOGGER.info("Updating the respawn location of player {} to [NONE]", player.getName().getString());
         }
+
+        if (pos != null && Objects.requireNonNull(player.getServer()).overworld().getBlockState(pos).getBlock() instanceof BedBlock) {
+            // Player set respawn location to a bed, do not execute custom respawn logic
+            return;
+        }
+
+        this.checkRecentRespawn(player);
+
+    }
+
+
+    /** Harcore respawn custom logic **/
+    private void checkRecentRespawn(ServerPlayer player) {
+        // Check if the player died within the last 15 minutes
+        long lastDeathTime = lastDeathTimes.getOrDefault(player.getUUID(), 0L);
+        long currentTime = System.currentTimeMillis();
+
+        if (currentTime - lastDeathTime <= RESPAWN_COOLDOWN) {
+            // Player died within the last 15 minutes, set health and hunger to half
+            player.setHealth(player.getMaxHealth() / 2.0f);
+            player.getFoodData().eat(-10, 0.5f);
+        }
+
+        // Store the timestamp of the player's death
+        lastDeathTimes.put(player.getUUID(), System.currentTimeMillis());
+    }
+
+
+
+
+
+    private boolean isAllowedBiome(ServerLevel world, BlockPos pos) {
+        Biome biome = world.getBiome(pos).value();
+
+        // Add the names of the biomes you want to exclude from respawn here
+        List<String> excludedBiomes = Arrays.asList(
+
+                Biomes.JUNGLE.toString(),
+                Biomes.SPARSE_JUNGLE.toString(),
+                Biomes.BAMBOO_JUNGLE.toString(),
+                Biomes.SWAMP.toString(),
+                Biomes.MANGROVE_SWAMP.toString(),
+                Biomes.COLD_OCEAN.toString(),
+                Biomes.DEEP_COLD_OCEAN.toString()
+
+        );
+
+        Registry<Biome> biomeRegistry = world.registryAccess().registryOrThrow(Registries.BIOME);
+
+        /**
+        // Check if the biome's registry name is in the excluded list
+        ResourceLocation biomeRegistryName = world.registryAccess().lookupOrThrow(Registries.BIOME)..getKey(biome);
+        if (biomeRegistryName != null && excludedBiomes.contains(biomeRegistryName.toString())) {
+            BetterRespawnMod.LOGGER.info("Biome {} is excluded from respawn", biomeRegistryName);
+            return false;
+        }
+         **/
+
+        return true;
     }
 
     @Nullable

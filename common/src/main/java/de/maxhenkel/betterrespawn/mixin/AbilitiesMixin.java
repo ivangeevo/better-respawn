@@ -23,6 +23,11 @@ public class AbilitiesMixin implements RespawnAbilities {
     private float respawnAngle;
     private boolean respawnForced;
 
+    /** Custom added variables for Hardcore Respawn **/
+    private static final String LAST_DEATH_TIME_TAG = "last_death_time";
+    private long lastDeathTime;
+
+
     @Inject(method = "addSaveData", at = @At(value = "RETURN"))
     private void addSaveData(CompoundTag compoundTag, CallbackInfo ci) {
         CompoundTag abilities = compoundTag.getCompound("abilities");
@@ -45,6 +50,11 @@ public class AbilitiesMixin implements RespawnAbilities {
         betterRespawn.putBoolean("respawn_forced", respawnForced);
 
         abilities.put("better_respawn", betterRespawn);
+
+        /** HC Respawn **/
+
+        // Save the last death timestamp
+        betterRespawn.putLong(LAST_DEATH_TIME_TAG, lastDeathTime);
     }
 
     @Inject(method = "loadSaveData", at = @At(value = "RETURN"))
@@ -82,6 +92,13 @@ public class AbilitiesMixin implements RespawnAbilities {
             respawnPos = null;
             respawnAngle = 0F;
             respawnForced = false;
+        }
+
+        // Load the last death timestamp
+        if (abilities.contains(LAST_DEATH_TIME_TAG)) {
+            lastDeathTime = abilities.getLong(LAST_DEATH_TIME_TAG);
+        } else {
+            lastDeathTime = 0L;
         }
     }
 
@@ -125,4 +142,9 @@ public class AbilitiesMixin implements RespawnAbilities {
     public boolean getRespawnForced() {
         return respawnForced;
     }
+
+    public long getLastDeathTime() {
+        return lastDeathTime;
+    }
+
 }
