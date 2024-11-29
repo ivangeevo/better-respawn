@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "better_respawn",
   "version": "${mod_version}",
-  "name": "Better Respawn",
-  "description": "This mod adds a mechanic that lets you respawn near your death location",
+  "name": "Better Respawn HC Edition",
+  "description": "This mod changes the game so that you spawn in a random place on death with the end goal of setting your spawn in a new way.",
   "authors": [
-    "Max Henkel"
+    "Max Henkel; Ivan Geevo"
   ],
   "contact": {
     "homepage": "https://modrepo.de/minecraft/better_respawn",

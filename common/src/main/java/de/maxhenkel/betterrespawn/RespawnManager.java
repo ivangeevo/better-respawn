@@ -115,10 +115,12 @@ public class RespawnManager {
         long lastDeathTime = lastDeathTimes.getOrDefault(player.getUUID(), 0L);
         long currentTime = System.currentTimeMillis();
 
-        if (currentTime - lastDeathTime <= RESPAWN_COOLDOWN) {
-            // Player died within the last 15 minutes, set health and hunger to half
-            player.setHealth(player.getMaxHealth() / 2.0f);
-            player.getFoodData().eat(-10, 0.5f);
+        // only apply penalty if the player has died recently (aka lastDeathTime != 0)
+        if (lastDeathTime != 0) {
+            if (currentTime - lastDeathTime <= RESPAWN_COOLDOWN) {
+                // Player died recently; Set health to half
+                player.setHealth(player.getMaxHealth() / 2.0f);
+            }
         }
 
         // Store the timestamp of the player's death
