@@ -24,7 +24,7 @@ public class AbilitiesMixin implements RespawnAbilities {
     private boolean respawnForced;
 
     /** Custom added variables for Hardcore Respawn **/
-    private static final String LAST_DEATH_TIME_TAG = "last_death_time";
+    //private static final String LAST_DEATH_TIME_TAG = "last_death_time";
     private long lastDeathTime;
 
 
@@ -49,12 +49,10 @@ public class AbilitiesMixin implements RespawnAbilities {
         betterRespawn.putFloat("respawn_angle", respawnAngle);
         betterRespawn.putBoolean("respawn_forced", respawnForced);
 
+        // HC Respawn added
+        betterRespawn.putLong("last_death_time", lastDeathTime);
+
         abilities.put("better_respawn", betterRespawn);
-
-        /** HC Respawn **/
-
-        // Save the last death timestamp
-        betterRespawn.putLong(LAST_DEATH_TIME_TAG, lastDeathTime);
     }
 
     @Inject(method = "loadSaveData", at = @At(value = "RETURN"))
@@ -87,19 +85,22 @@ public class AbilitiesMixin implements RespawnAbilities {
             } else {
                 respawnForced = false;
             }
+
+            // TODO: FIX Data about last death time not saving; The value is always showing 0L, but it seems to properly work.
+            // HC Respawn added
+            if (betterRespawn.contains("last_death_time")) {
+                lastDeathTime = betterRespawn.getLong("last_death_time");
+            } else {
+                lastDeathTime = 0L;
+            }
         } else {
             respawnDimension = Level.OVERWORLD;
             respawnPos = null;
             respawnAngle = 0F;
             respawnForced = false;
-        }
-
-        // Load the last death timestamp
-        if (abilities.contains(LAST_DEATH_TIME_TAG)) {
-            lastDeathTime = abilities.getLong(LAST_DEATH_TIME_TAG);
-        } else {
             lastDeathTime = 0L;
         }
+
     }
 
 
@@ -145,6 +146,11 @@ public class AbilitiesMixin implements RespawnAbilities {
 
     public long getLastDeathTime() {
         return lastDeathTime;
+    }
+
+    @Override
+    public void setLastDeathTime(long time) {
+        lastDeathTime = time;
     }
 
 }

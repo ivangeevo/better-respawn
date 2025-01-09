@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "better_respawn",
+  "id": "better_respawn_hc",
   "version": "${mod_version}",
   "name": "Better Respawn HC Edition",
   "description": "This mod changes the game so that you spawn in a random place on death with the end goal of setting your spawn in a new way.",

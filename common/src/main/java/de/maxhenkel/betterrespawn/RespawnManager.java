@@ -28,6 +28,9 @@ public class RespawnManager {
 
     /** Hardcore Respawn added variables **/
     private final Map<UUID, Long> lastDeathTimes = new HashMap<>();
+
+    private static boolean isRecentDeath;
+
     private static final long RESPAWN_COOLDOWN = 9 * 60 * 1000; // 9 minutes in milliseconds
 
 
@@ -44,6 +47,9 @@ public class RespawnManager {
         respawnAbilities.setRespawnPos(player.getRespawnPosition());
         respawnAbilities.setRespawnAngle(player.getRespawnAngle());
         respawnAbilities.setRespawnForced(player.isRespawnForced());
+
+        // hc edition added
+        respawnAbilities.setLastDeathTime(lastDeathTimes.getOrDefault(player.getUUID(), 0L));
 
 
         ServerLevel respawnDimension = player.getServer().getLevel(player.getRespawnDimension());
@@ -111,7 +117,6 @@ public class RespawnManager {
 
     /** Harcore respawn custom logic **/
     private void checkRecentRespawn(ServerPlayer player) {
-        // Check if the player died within the last 15 minutes
         long lastDeathTime = lastDeathTimes.getOrDefault(player.getUUID(), 0L);
         long currentTime = System.currentTimeMillis();
 
@@ -121,15 +126,28 @@ public class RespawnManager {
                 // Player died recently; Set health to half
                 player.setHealth(player.getMaxHealth() / 2.0f);
             }
+        } else {
+            // Check if the world is single-player or the server has only 1 player
+            if (player.server.isSingleplayer() || player.server.getPlayerList().getPlayers().size() == 1) {
+                // Use a default value for the float parameter (1.0f should work in most cases)
+                float interpolationFactor = 1.0f;
+                long currentWorldTime = (long) player.serverLevel().getTimeOfDay(interpolationFactor); // Get time of day with float parameter
+                long morningTime = 1000;
+
+                // Set the world time to morning on the next day
+                if (currentWorldTime > morningTime) {
+                    // If it's past morning, set the time to the next morning
+                    player.serverLevel().setDayTime(24000 + morningTime); // This ensures the time wraps to the next day correctly
+                } else {
+                    // If it's before morning, set the time directly to morning
+                    player.serverLevel().setDayTime(morningTime);
+                }
+            }
         }
 
         // Store the timestamp of the player's death
         lastDeathTimes.put(player.getUUID(), System.currentTimeMillis());
     }
-
-
-
-
 
     private boolean isAllowedBiome(ServerLevel world, BlockPos pos) {
         Biome biome = world.getBiome(pos).value();
@@ -185,5 +203,7 @@ public class RespawnManager {
     private int getRandomRange(int actual, int minDistance, int maxDistance) {
         return actual + (random.nextBoolean() ? -1 : 1) * (minDistance + random.nextInt(maxDistance - minDistance));
     }
+
+
 
 }

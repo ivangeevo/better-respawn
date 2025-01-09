@@ -17,4 +17,4 @@ C:\Users\Weedmix\.gradle\caches\minecraft\assets
 --fml.neoFormVersion
 20240808.144430
 --fml.mixin
-better_respawn.mixins.json
+better_respawn_hc.mixins.json

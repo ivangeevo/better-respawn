@@ -24,10 +24,9 @@ public interface RespawnAbilities {
 
     boolean getRespawnForced();
 
-
     // Hardcore Respawn added
     long getLastDeathTime();
 
-
+    void setLastDeathTime(long time);
 
 }

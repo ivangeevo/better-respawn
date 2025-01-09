@@ -3,7 +3,7 @@ loaderVersion = "*"
 license = "All rights reserved"
 issueTrackerURL = "https://github.com/henkelmax/better-respawn"
 [[mods]]
-modId = "better_respawn"
+modId = "better_respawn_hc"
 version = "${mod_version}"
 displayName = "Better Respawn HC Edition"
 updateJSONURL = "https://update.maxhenkel.de/neoforge/better_respawn"
@@ -11,13 +11,13 @@ displayURL = "https://modrepo.de/minecraft/better_respawn"
 logoFile = "icon.png"
 authors = "Max Henkel; Ivan Geevo"
 description = '''This mod changes the game so that you spawn in a random place on death with the end goal of setting your spawn in a new way.'''
-[[dependencies.better_respawn]]
+[[dependencies.better_respawn_hc]]
 modId = "neoforge"
 type = "required"
 versionRange = "${neoforge_dependency}"
 ordering = "NONE"
 side = "BOTH"
-[[dependencies.better_respawn]]
+[[dependencies.better_respawn_hc]]
 modId = "minecraft"
 type = "required"
 versionRange = "[1.21,1.21.1]"
